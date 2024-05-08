@@ -1,24 +1,15 @@
 import React from 'react';
-import logo from './logo.svg';
 import './App.css';
+import * as logic from "./apple_logic" ;
+import {WormCanvas} from "./WormCanvas";
+import {read_game, test_game} from "./apple_logic";
 
 function App() {
+  logic.test_apple()
+  const gm = read_game(test_game)
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <WormCanvas gm={gm} mw={400} mh={200} />
     </div>
   );
 }
