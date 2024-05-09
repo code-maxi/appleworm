@@ -5,9 +5,46 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background: url(../public/paper_background.png) repeat;
+  background-size: cover;
 }
 
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+.worm-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.worm-grid-container {
+  display: flex;
+  flex-direction: column;
+}
+.worm-grid-row {
+  display: flex;
+}
+.worm-rot-0 { rotate: 0deg; }
+.worm-rot-1 { rotate: 90deg; }
+.worm-rot-2 { rotate: 180deg; }
+.worm-rot-3 { rotate: 270deg; }
+.worm-rot--1 { rotate: -90deg; }
+.worm-rot--2 { rotate: -180deg; }
+.worm-rot--3 { rotate: -270deg; }
+.worm-round-corner-0 { border-bottom-right-radius: 40% }
+.worm-round-corner-1 { border-bottom-left-radius: 40% }
+.worm-round-corner-2 { border-top-left-radius: 40% }
+.worm-round-corner-3 { border-top-right-radius: 40% }
+.worm-round-corners-0 { border-radius: 40% 0 0 40% }
+.worm-round-corners-1 { border-radius: 40% 40% 0 0 }
+.worm-round-corners-2, .worm-round-corners--2 { border-radius: 0 40% 40% 0 }
+.worm-round-corners--1 { border-radius: 0 0 40% 40% }
+.worm-round-corners-all { border-radius: 40% }
+.worm-nothing { visibility: hidden; }
+.worm-wall-shadow { box-shadow: 0 0 10px rgb(0,0,0, 0.75); }
