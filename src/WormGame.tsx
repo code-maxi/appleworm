@@ -1,5 +1,5 @@
 import {Component} from "react";
-import {dir_keys, directions, gm_to_img, gm_to_str, move, read_game, test_level} from "./apple_logic";
+import {dir_keys, directions, fall_things, gm_to_img, gm_to_str, move, read_game, test_level} from "./apple_logic";
 
 type _wg_state = {
     time: number,
@@ -11,6 +11,8 @@ type _wg_state = {
 }
 type _wg_probs = any
 export class WormGame extends Component<_wg_probs, _wg_state> {
+    private fall_interval: NodeJS.Timer | null = null
+
     constructor(props: any) {
         super(props)
         this.state = {
@@ -21,13 +23,27 @@ export class WormGame extends Component<_wg_probs, _wg_state> {
     }
 
     keydown(e: KeyboardEvent) {
-        if (dir_keys.includes(e.key)) {
-            const mv = directions[dir_keys.indexOf(e.key)]
-            move(this.state.game, mv)
-            this.setState(this.state)
-            console.log('move ' + mv)
+        if (dir_keys.includes(e.key) && this.fall_interval == null) {
+            this.move_worm(directions[dir_keys.indexOf(e.key)])
+            console.log('MOVE!')
             console.log(gm_to_str(this.state.game))
         }
+    }
+
+    move_worm(mv: [number, number]) {
+        const valid_move = move(this.state.game, mv)
+        if (valid_move && this.fall_interval == null) {
+            this.fall_interval = setInterval(() => {
+                if (fall_things(this.state.game)) this.setState(this.state)
+                else if (this.fall_interval) {
+                    console.log('FELL!')
+                    console.log(gm_to_str(this.state.game))
+                    clearInterval(this.fall_interval)
+                    this.fall_interval = null
+                }
+            }, 75)
+        }
+        this.setState(this.state)
     }
 
     set_level(i: number) {

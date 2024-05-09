@@ -13,6 +13,44 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+@keyframes rotate-target {
+  0% {
+    transform: rotate(0deg)
+  }
+  100% {
+    transform: rotate(360deg)
+  }
+}
+@keyframes rotate-apple {
+  0% {
+    transform: rotate(-8deg)
+  }
+  50% {
+    transform: rotate(8deg)
+  }
+  100% {
+    transform: rotate(-8deg)
+  }
+}
+.worm-target-animation {
+  animation: rotate-target 5s linear infinite;
+}
+.worm-apple-animation-s1 {
+  animation: rotate-apple 1.5s infinite;
+}
+.worm-apple-animation-s2 {
+  animation: rotate-apple 1.75s infinite;
+}
+.worm-apple-animation-s3 {
+  animation: rotate-apple 2s infinite;
+}
+.worm-apple-animation-s4 {
+  animation: rotate-apple 2.25s infinite;
+}
+.worm-apple-animation-s5 {
+  animation: rotate-apple 2.5s infinite;
+}
+
 .worm-container {
   position: fixed;
   top: 0;

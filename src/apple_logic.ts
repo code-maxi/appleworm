@@ -37,30 +37,26 @@ export function gm_to_str(gm: number[][]): string {
     return str
 }
 
-function fall(gm: number[][], items: [number, number][], is_own: (n: number) => boolean) {
-    const iys = new Array<number>(gm[0].length).fill(-gm.length)
-    const dys = new Array<number>(gm[0].length).fill(gm.length)
-    for (let x = 0; x < iys.length; x++) {
+function fall(gm: number[][], items: [number, number][], is_own: (n: number) => boolean): boolean {
+    let fall = true
+    for (let x = 0; x < gm[0].length; x++) {
         for (let p of items) {
-            if (p[0] === x && iys[x] < p[1]) { iys[x] = p[1] }
+            if (p[0] === x) {
+                const below = p[1]+1 < gm.length ? gm[p[1]+1][p[0]] : null
+                fall = fall && (below == null || below === ids.indexOf(' ') || below < 0)
+            }
         }
     }
-    for (let y = 0; y < gm.length; y++) {
-        for (let x = 0; x < gm[y].length; x++) {
-            const dy = y - iys[x] - 1
-            if (dy >= 0 && gm[y][x] !== ids.indexOf(' ') && !is_own(gm[y][x]) && dys[x] > dy) dys[x] = dy
-        }
-    }
-    const mdy = Math.min(...dys)
-    if (mdy > 0) {
+    if (fall) {
         for (let p of items) {
-            if (mdy < gm.length) gm[p[1] + mdy][p[0]] = gm[p[1]][p[0]]
+            if (p[1] + 1 < gm.length) gm[p[1] + 1][p[0]] = gm[p[1]][p[0]]
             gm[p[1]][p[0]] = 0
         }
     }
+    return fall
 }
 
-export function move(gm: number[][], dm: [number, number]) {
+function find_worm_stones(gm: number[][]): [number, number][][] {
     const worm: [number, number][] = []
     const stones: [number, number][] = []
     for (let y = 0; y < gm.length; y++) {
@@ -73,16 +69,23 @@ export function move(gm: number[][], dm: [number, number]) {
             }
         }
     }
+    return [worm, stones]
+}
+
+export function move(gm: number[][], dm: [number, number]): boolean {
+    const worm_stones = find_worm_stones(gm)
+    const worm = worm_stones[0]
+    const stones = worm_stones[1]
 
     const h_next = v_add(worm[worm.length-1], dm)
-    if (!in_range(gm, h_next)) return
+    if (!in_range(gm, h_next)) return false
     const possible_ids = [ids.indexOf('X'), ids.indexOf(' '), ids.indexOf('a')]
 
-    if (!possible_ids.includes(v_get(gm, h_next))) return
+    if (!possible_ids.includes(v_get(gm, h_next))) return false
     const mode = possible_ids.indexOf(v_get(gm, h_next))
     if (mode === 0) {
         const h_next_next = v_add(worm[worm.length-1], v_mul(dm, 2))
-        if (v_get(gm, h_next_next) !== ids.indexOf(' ')) return
+        if (v_get(gm, h_next_next) !== ids.indexOf(' ')) return false
         v_set(gm, h_next_next, v_get(gm, h_next))
         for (let i = 0; i < stones.length; i++) {
             if (v_eq(stones[i], h_next)) {
@@ -90,22 +93,28 @@ export function move(gm: number[][], dm: [number, number]) {
             }
         }
     }
-    const worm2 = JSON.parse(JSON.stringify(worm))
     if (mode === 0 || mode === 1) {
         v_set(gm, h_next, -worm.length)
-        worm2[worm.length-1] = h_next
         for (let i = 0; i < worm.length; i++) {
             v_set(gm, worm[i], v_get(gm, worm[i]) + 1)
-            if (i > 0) worm2[i-1] = worm[i]
         }
     }
     if (mode === 2) {
         v_set(gm, h_next, -worm.length - 1)
-        worm2.push(h_next)
     }
+    return true
+}
 
-    stones.forEach(stone => fall(gm, [stone], n => n === ids.indexOf('X')))
-    fall(gm, worm2, n => n < 0)
+export function fall_things(gm: number[][]): boolean {
+    const worm_stones = find_worm_stones(gm)
+    const worm = worm_stones[0]
+    const stones = worm_stones[1]
+    let b1 = false
+    stones.forEach(stone => {
+        b1 = b1 || fall(gm, [stone], n => n === ids.indexOf('X'))
+    })
+    const b2 = fall(gm, worm, n => n < 0)
+    return b1 || b2
 }
 
 export function is_game_over(gm: number[][]): boolean {
@@ -175,10 +184,11 @@ export function gm_to_img(gm: number[][]) {
                         gm_img[y][x] = 'stone.png'
                         break
                     case 'a':
-                        gm_img[y][x] = 'apple.png'
+                        const rs = Math.round((x + y/2) / (gm.length + gm[0].length/2) * 6)
+                        gm_img[y][x] = 'apple.png#worm-apple-animation-s'+rs
                         break
                     case '*':
-                        gm_img[y][x] = 'target.png'
+                        gm_img[y][x] = 'target.png#worm-target-animation'
                         break
                 }
             }
@@ -214,9 +224,9 @@ export function gm_to_img(gm: number[][]) {
     return gm_img
 }
 
-export const test_level = `                 
-         X  a
-         #   X
+export const test_level = `         X   X
+            a
+         #    
         a
       321    #
       ###        
